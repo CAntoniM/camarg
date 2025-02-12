@@ -25,6 +25,12 @@ namespace arg {
      * @brief this is an error that is throw in an value already exists in the
      *        in the Parser;
      *
+     * \code {.cpp}
+     * Parser parser("foo","bar");
+     * parser.arg("test","arg");
+     * parser.arg("test","arg"); // Throws Already exits exception
+     * \endcode
+     *
      */
     class CAMEXPORT AlreadyExsists : public std::exception {
         const char* what() const noexcept { return "AlreadyExists"; }
@@ -34,6 +40,15 @@ namespace arg {
      * @brief this is an error that is thrown in the case where the user calls
      *        a function that is only valid prethe parse function being called
      *
+     * \code {.cpp}
+     * Parser parser("foo","bar");
+     * parser.arg("test","arg");
+     *
+     * parser.parse(argc,argv);
+     *
+     * parser.arg("test","arg"); //thows AlreadyParsed exception, as the parse
+     *                           //function has already been called
+     * \endcode
      */
     class CAMEXPORT AlreadyParsed : public std::exception {
         const char* what() const noexcept { return "AlreadyParsed"; }
@@ -42,6 +57,12 @@ namespace arg {
     /**
      * @brief this is an error that is thorwn if the name of a value does not
      * pass our validation checks
+     *
+     * \code {.cpp}
+     * Parser parser("foo", "bar");
+     * parser.arg("","test"); // throws invalid name exception as blank names
+     *                        // are not valid
+     * \endcode
      *
      */
     class CAMEXPORT InvalidName : public std::exception {
@@ -52,6 +73,13 @@ namespace arg {
      * @brief this is an error that is thrown if the user tries to configure the
      * the parser in such a way that is unsupported
      *
+     * \code {.cpp}
+     * Parser parser("parser","parser");
+     *
+     * parser.parse(argc,argv); // their is nothing defined in the parser so we
+     *                          // nothing to parse the arguments in to so we
+     *                          // throw a invalid config
+     * \endcode
      */
     class CAMEXPORT InvalidParserConfig : public std::exception {
         const char* what() const noexcept { return "InvalidParserConfig"; }
@@ -61,6 +89,15 @@ namespace arg {
      * @brief this is error that is thrown if the user tried to retreve a value
      *        that has not been defined in the parser.
      *
+     * \code {.cpp}
+     * Parser paser("parser","parser");
+     *
+     * parser.arg("test", "test");
+     * parser.parse(argc,argv);
+     *
+     * std::string result = parser.get("foo"); // Throws NoSuchValue as their is
+     *                                         // no value called foo in defined
+     * \endcode
      */
     class CAMEXPORT NoSuchValue : public std::exception {
         const char* what() const noexcept { return "NoSuchValue"; }
@@ -70,6 +107,19 @@ namespace arg {
      * @brief this is an error when the user provides an input that does not
      * match the configuration that was set up before parsing;
      *
+     * \code
+     * int argc = 3;
+     * const char* argv[3] = {"test","test","foo"};
+     *
+     * Parser parser("foo","bar");
+     * parser.flag("test","a example", true); // the parser is defind the expect
+     *                                        // --test or -test rather than
+     *                                        // just test
+     *
+     * parser.parse(argc,argv); // throws Invalid command as the command line
+     *                          // arguments provided do not match what is
+     *                          // defined by the code.
+     * \endcode
      */
     class CAMEXPORT InvalidCommand : public std::exception {
         const char* what() const noexcept { return "InvalidCommand"; }
@@ -93,7 +143,6 @@ namespace arg {
          * excepting new flags
          * @throws InvalidName if the name of the flag does not pass the
          * validation checks
-         *
          *
          * @param name the name of the flag with out the preceeding -
          * @param help the description of the flag provided to the users
@@ -138,6 +187,10 @@ namespace arg {
          * @param help the description of the argument
          * @param default_value the value that will be returned if no value of
          * provided
+         *
+         * @warning this feature is mutaly exclusive with the cmd function on a
+         * single instance of the class
+         *
          */
         void arg(string name, string help, string default_value = "");
         /**
